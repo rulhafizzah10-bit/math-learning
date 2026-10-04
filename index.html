@@ -1,960 +1,939 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Learning - Bangun Ruang 3D</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Learning | Bangun Ruang Sisi Lengkung</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --accent: #f7b267;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --bg: #edf2ff;
+      --panel: #ffffff;
+      --text: #1c2430;
+      --muted: #5a6475;
+      --shadow: 0 18px 45px rgba(25, 35, 80, 0.18);
+      --radius: 20px;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    * { box-sizing: border-box; }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef3ff 0%, #f9f1ff 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+    }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+    }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+    .app {
+      width: min(1200px, 100%);
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(122, 124, 190, 0.12);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 28px 30px;
+      text-align: center;
+    }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 30px;
-        }
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 0.02em;
+    }
 
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+    .header p {
+      margin: 0;
+      font-size: 1.05rem;
+      opacity: 0.95;
+    }
 
-        .section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+    .content {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      padding: 30px;
+    }
 
-        .section h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
 
-        .shape-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(94, 105, 167, 0.12);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px rgba(68, 75, 124, 0.08);
+      padding: 22px;
+    }
 
-        .shape-btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 12px;
-            border: 2px solid #ddd;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            color: #333;
-        }
+    .panel h2 {
+      margin: 0 0 18px;
+      color: var(--primary);
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
 
-        .shape-btn:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
+    .shape-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
 
-        .shape-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
+    .shape-btn, .zoom-btn, .btn {
+      border: 2px solid #dfe7ff;
+      background: white;
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-weight: 700;
+    }
 
-        #canvas {
-            width: 100%;
-            height: 400px;
-            border-radius: 10px;
-            background: linear-gradient(to bottom, #e3f2fd, #f5f5f5);
-        }
+    .shape-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 12px 14px;
+    }
 
-        .zoom-controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
+    .shape-btn:hover, .zoom-btn:hover, .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.12);
+    }
 
-        .zoom-btn {
-            padding: 10px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            color: #333;
-        }
+    .shape-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: transparent;
+    }
 
-        .zoom-btn:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(118, 75, 162, 0.12);
+      background: linear-gradient(180deg, #eaf2ff, #f7f8ff);
+    }
 
-        .zoom-btn.active {
-            background: #764ba2;
-            color: white;
-            border-color: #764ba2;
-        }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
-        .info-box {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
+    .floating-label {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(102,126,234,0.25);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--primary);
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(102,126,234,0.12);
+      max-width: 220px;
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
 
-        .info-box h3 {
-            color: #667eea;
-            margin-bottom: 8px;
-        }
+    .floating-label.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-        .info-box p {
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
+    .zoom-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
 
-        .formula {
-            background: #fff3cd;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: #856404;
-        }
+    .zoom-btn {
+      padding: 12px 10px;
+    }
 
-        .quiz-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+    .zoom-btn.active {
+      background: linear-gradient(135deg, #ffb85c, #f57c65);
+      border-color: transparent;
+      color: white;
+    }
 
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+    .info-box {
+      background: linear-gradient(180deg, #f9faff, #f3f7ff);
+      border-left: 4px solid var(--primary);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 18px;
+    }
 
-        .quiz-header h2 {
-            color: #667eea;
-            margin: 0;
-            border: none;
-            padding: 0;
-        }
+    .info-box h3 {
+      margin: 0 0 8px;
+      color: var(--primary);
+      font-size: 1.15rem;
+    }
 
-        .progress-bar {
-            background: #ddd;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
+    .info-box p {
+      margin: 0;
+      line-height: 1.6;
+      color: var(--muted);
+    }
 
-        .progress-fill {
-            background: #667eea;
-            height: 100%;
-            transition: width 0.3s;
-        }
+    .formula-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff8dc;
+      border: 1px solid rgba(255, 193, 7, 0.45);
+      color: #7d5d00;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      word-break: break-word;
+    }
 
-        .question-number {
-            color: #999;
-            font-size: 0.9em;
-        }
+    .quiz-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
 
-        .question {
-            margin-bottom: 20px;
-        }
+    .quiz-head small {
+      color: var(--muted);
+      font-weight: 700;
+    }
 
-        .question h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
+    .progress {
+      height: 10px;
+      background: #e8ebf8;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
 
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.25s ease;
+    }
 
-        .option {
-            padding: 15px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-        }
+    .question-wrap h3 {
+      margin: 0 0 12px;
+      line-height: 1.6;
+      font-size: 1.03rem;
+    }
 
-        .option:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-        .option input[type="radio"] {
-            margin-right: 12px;
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-        }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid #e4eaf7;
+      background: #ffffff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
 
-        .option.correct {
-            background: #d4edda;
-            border-color: #28a745;
-        }
+    .option:hover {
+      border-color: #b9c5fb;
+      background: #f5f8ff;
+    }
 
-        .option.incorrect {
-            background: #f8d7da;
-            border-color: #dc3545;
-        }
+    .option input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
 
-        .feedback {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
+    .option.correct {
+      background: #dbf7e5;
+      border-color: var(--success);
+      color: #0c5d2f;
+    }
 
-        .feedback.show {
-            display: block;
-        }
+    .option.incorrect {
+      background: #fee6eb;
+      border-color: var(--danger);
+      color: #9d122f;
+    }
 
-        .feedback.correct {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            color: #155724;
-        }
+    .feedback {
+      margin-top: 14px;
+      border-radius: 12px;
+      padding: 12px 14px;
+      line-height: 1.6;
+      display: none;
+      font-weight: 600;
+    }
 
-        .feedback.incorrect {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
-            color: #721c24;
-        }
+    .feedback.show {
+      display: block;
+    }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1em;
-            transition: all 0.3s;
-            margin-top: 15px;
-        }
+    .feedback.correct {
+      background: #dbf7e5;
+      color: #0a5a2e;
+      border: 1px solid rgba(40, 167, 69, 0.4);
+    }
 
-        .btn-primary:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    .feedback.incorrect {
+      background: #fee6eb;
+      color: #8d1b33;
+      border: 1px solid rgba(220, 53, 69, 0.35);
+    }
 
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
+    .btn-row {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+    }
 
-        .qr-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      font-size: 0.98rem;
+    }
 
-        .qr-section h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-        }
+    .btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
-        #qrCode {
-            display: inline-block;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
+    .qr-box {
+      margin-top: 24px;
+      background: linear-gradient(180deg, #f9faff, #f4f7ff);
+      border-radius: 18px;
+      padding: 22px;
+      border: 1px solid rgba(102, 126, 234, 0.14);
+    }
 
-        .session-id {
-            background: #f0f4ff;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-            color: #667eea;
-            font-weight: bold;
-        }
+    .qr-box h2 {
+      margin: 0 0 8px;
+      color: var(--primary);
+    }
 
-        .results {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+    .qr-box p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
 
-        .results h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-        }
+    #qrCode {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 220px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid rgba(102,126,234,0.16);
+      padding: 14px;
+    }
 
-        .score-display {
-            font-size: 3em;
-            color: #667eea;
-            font-weight: bold;
-            margin: 20px 0;
-        }
+    .session-chip {
+      margin-top: 14px;
+      background: #edf1ff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      word-break: break-all;
+    }
 
-        .score-display.excellent {
-            color: #28a745;
-        }
+    .result-panel {
+      display: none;
+      margin-top: 18px;
+      text-align: center;
+    }
 
-        .score-display.good {
-            color: #667eea;
-        }
+    .result-panel.show {
+      display: block;
+    }
 
-        .score-display.fair {
-            color: #ffc107;
-        }
+    .score {
+      font-size: clamp(2.5rem, 6vw, 3.5rem);
+      font-weight: 900;
+      margin: 12px 0;
+      color: var(--primary);
+    }
 
-        .score-display.poor {
-            color: #dc3545;
-        }
+    .score.excellent { color: var(--success); }
+    .score.good { color: var(--primary); }
+    .score.fair { color: var(--warning); }
+    .score.poor { color: var(--danger); }
 
-        .message {
-            font-size: 1.2em;
-            color: #555;
-            margin-bottom: 20px;
-        }
+    .result-message {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
 
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    @media (max-width: 520px) {
+      body { padding: 15px; }
+      .header { padding: 22px 18px; }
+      .content { padding: 18px; }
+      .panel { padding: 16px; }
+      .zoom-controls { grid-template-columns: 1fr; }
+      .shape-selector { flex-direction: column; }
+      .canvas-wrap { height: 320px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎓 Math Learning</h1>
-            <p>Pembelajaran Interaktif Bangun Ruang Sisi Lengkung Kelas 9</p>
+  <div class="app">
+    <header class="header">
+      <h1>🎓 Math Learning</h1>
+      <p>Pembelajaran Interaktif Bangun Ruang Sisi Lengkung Kelas 9</p>
+    </header>
+
+    <main class="content">
+      <section class="panel">
+        <h2>📐 Visualisasi 3D</h2>
+
+        <div class="shape-selector">
+          <button class="shape-btn active" data-shape="cylinder">Tabung</button>
+          <button class="shape-btn" data-shape="cone">Kerucut</button>
+          <button class="shape-btn" data-shape="sphere">Bola</button>
         </div>
 
-        <div class="main-content">
-            <!-- 3D Visualization Section -->
-            <div class="section">
-                <h2>📐 Visualisasi 3D</h2>
-                <div class="shape-selector">
-                    <button class="shape-btn active" onclick="selectShape('cylinder')">Tabung</button>
-                    <button class="shape-btn" onclick="selectShape('cone')">Kerucut</button>
-                    <button class="shape-btn" onclick="selectShape('sphere')">Bola</button>
-                </div>
-                <canvas id="canvas"></canvas>
-                <div class="zoom-controls">
-                    <button class="zoom-btn" onclick="zoomPart('base')">Alas</button>
-                    <button class="zoom-btn" onclick="zoomPart('lateral')">Selimut</button>
-                    <button class="zoom-btn" onclick="zoomPart('height')">Tinggi</button>
-                </div>
-                <div class="info-box">
-                    <h3 id="partTitle">Alas</h3>
-                    <p id="partDescription">Klik pada bagian bangun ruang untuk melihat penjelasan dan rumus</p>
-                    <div id="formulaBox" class="formula"></div>
-                </div>
-            </div>
-
-            <!-- Quiz Section -->
-            <div class="section">
-                <div class="quiz-header">
-                    <div>
-                        <h2>❓ Latihan Soal</h2>
-                        <div class="question-number" id="questionCounter">Soal 1 dari 10</div>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
-                </div>
-                <div id="quizContainer">
-                    <div id="quizContent"></div>
-                    <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Lanjut</button>
-                </div>
-            </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas"></canvas>
+          <div id="floatingLabel" class="floating-label"></div>
         </div>
 
-        <!-- QR Code Section -->
-        <div class="qr-section">
-            <h2>📱 Bagikan dengan QR Code</h2>
-            <p>Scan kode QR di bawah untuk membuka aplikasi ini dengan soal yang berbeda setiap kali!</p>
-            <div id="qrCode"></div>
-            <div class="session-id">
-                Kode Sesi: <span id="sessionCode"></span>
-            </div>
-            <button class="btn-primary" onclick="generateNewQR()">Buat QR Baru</button>
+        <div class="zoom-controls">
+          <button class="zoom-btn active" data-part="base">Alas</button>
+          <button class="zoom-btn" data-part="lateral">Selimut</button>
+          <button class="zoom-btn" data-part="height">Tinggi</button>
         </div>
 
-        <!-- Results Section -->
-        <div class="results hidden" id="resultsSection">
-            <h2>✅ Hasil Akhir</h2>
-            <div class="score-display" id="scoreDisplay">0/10</div>
-            <div class="message" id="resultMessage"></div>
-            <button class="btn-primary" onclick="resetQuiz()">Mulai Ulang Quiz</button>
+        <div class="info-box">
+          <h3 id="partTitle">Alas Tabung</h3>
+          <p id="partDescription">Alas tabung berbentuk lingkaran. Untuk menghitung luas alas, gunakan rumus luas lingkaran.</p>
+          <div id="formulaBox" class="formula-box">Luas Alas = πr²</div>
         </div>
-    </div>
+      </section>
 
-    <script>
-        // Three.js 3D Setup
-        let scene, camera, renderer;
-        let currentShape = 'cylinder';
-        let currentZoom = 'base';
+      <aside class="panel">
+        <div class="quiz-head">
+          <h2>❓ Latihan Soal</h2>
+          <small id="questionCounter">Soal 1 dari 10</small>
+        </div>
 
-        function initThreeJS() {
-            const canvas = document.getElementById('canvas');
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-            renderer.setClearColor(0xf5f5f5);
+        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
 
-            camera.position.z = 3;
+        <div id="quizContainer">
+          <div id="quizContent" class="question-wrap"></div>
+          <div class="btn-row">
+            <button id="nextBtn" class="btn" disabled>Lanjut</button>
+          </div>
+        </div>
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 5, 5);
-            scene.add(directionalLight);
+        <div id="resultPanel" class="result-panel">
+          <div id="scoreDisplay" class="score">0/10</div>
+          <div id="resultMessage" class="result-message"></div>
+          <button id="restartBtn" class="btn">Mulai Ulang Quiz</button>
+        </div>
+      </aside>
+    </main>
 
-            drawShape();
-            animate();
+    <section class="qr-box">
+      <h2>📱 Scan QR Code</h2>
+      <p>Setiap scan membuka sesi baru dan soal akan berbeda. Ayo belajar sambil bergerak!</p>
+      <div id="qrCode"></div>
+      <div id="sessionCode" class="session-chip">Kode Sesi: -</div>
+      <div class="btn-row" style="justify-content: center; margin-top: 16px;">
+        <button id="newQrBtn" class="btn">Buat QR Baru</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const shapeInfo = {
+      cylinder: {
+        base: {
+          title: '📍 Alas Tabung',
+          description: 'Alas tabung berbentuk lingkaran. Untuk menghitung luas alas, gunakan rumus luas lingkaran.',
+          formula: 'Luas Alas = πr²',
+          floating: 'Luas alas = πr²'
+        },
+        lateral: {
+          title: '🔄 Selimut Tabung',
+          description: 'Selimut tabung adalah sisi lengkung yang membungkus tabung. Jika dibuka akan berbentuk persegi panjang.',
+          formula: 'Luas Selimut = 2πrt',
+          floating: 'Selimut = 2πrt'
+        },
+        height: {
+          title: '📏 Tinggi Tabung',
+          description: 'Tinggi tabung adalah jarak antara alas dan tutup tabung yang sejajar.',
+          formula: 'Volume = πr²t',
+          floating: 'Tinggi = t'
         }
-
-        function drawShape() {
-            // Remove old meshes
-            scene.children.forEach(child => {
-                if (child instanceof THREE.Mesh) {
-                    scene.remove(child);
-                }
-            });
-
-            let mesh;
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x667eea,
-                shininess: 100,
-                wireframe: false
-            });
-
-            if (currentShape === 'cylinder') {
-                const geometry = new THREE.CylinderGeometry(1, 1, 2, 32);
-                mesh = new THREE.Mesh(geometry, material);
-            } else if (currentShape === 'cone') {
-                const geometry = new THREE.ConeGeometry(1, 2, 32);
-                mesh = new THREE.Mesh(geometry, material);
-            } else if (currentShape === 'sphere') {
-                const geometry = new THREE.SphereGeometry(1, 32, 32);
-                mesh = new THREE.Mesh(geometry, material);
-            }
-
-            mesh.rotation.x = 0.3;
-            mesh.rotation.z = 0.2;
-            scene.add(mesh);
+      },
+      cone: {
+        base: {
+          title: '📍 Alas Kerucut',
+          description: 'Alas kerucut berbentuk lingkaran, sama seperti alas tabung.',
+          formula: 'Luas Alas = πr²',
+          floating: 'Alas = πr²'
+        },
+        lateral: {
+          title: '🔄 Selimut Kerucut',
+          description: 'Selimut kerucut adalah sisi lengkung yang membentuk bentuk kerucut. s adalah garis pelukis.',
+          formula: 'Luas Selimut = πrs',
+          floating: 'Selimut = πrs'
+        },
+        height: {
+          title: '📏 Tinggi Kerucut',
+          description: 'Tinggi kerucut adalah jarak dari puncak ke pusat alas, tegak lurus dengan alas.',
+          formula: 'Volume = 1/3 πr²t',
+          floating: 'Tinggi = t'
         }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const mesh = scene.children.find(child => child instanceof THREE.Mesh);
-            if (mesh) {
-                mesh.rotation.x += 0.005;
-                mesh.rotation.z += 0.003;
-            }
-            renderer.render(scene, camera);
+      },
+      sphere: {
+        base: {
+          title: '🌍 Permukaan Bola',
+          description: 'Bola adalah bangun ruang yang terbentuk dari rotasi setengah lingkaran. Semua titik berjarak sama dari pusat.',
+          formula: 'Luas Permukaan = 4πr²',
+          floating: 'Permukaan = 4πr²'
+        },
+        lateral: {
+          title: '🌍 Permukaan Bola',
+          description: 'Seluruh permukaan bola merupakan satu kesatuan dengan jari-jari yang sama ke semua arah.',
+          formula: 'Luas Permukaan = 4πr²',
+          floating: 'Permukaan = 4πr²'
+        },
+        height: {
+          title: '📏 Jari-jari Bola',
+          description: 'Jari-jari bola adalah jarak dari pusat bola ke permukaan bola.',
+          formula: 'Volume = 4/3 πr³',
+          floating: 'r = jari-jari'
         }
+      }
+    };
 
-        function selectShape(shape) {
-            currentShape = shape;
-            currentZoom = 'base';
-            document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('.zoom-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('[onclick="zoomPart(\'base\')"]').classList.add('active');
-            drawShape();
-            updateInfo();
-            generateNewQuiz();
+    const quizDatabase = {
+      cylinder: [
+        { question: 'Sebuah tabung memiliki jari-jari 7 cm dan tinggi 10 cm. Berapa luas alas tabung? (π = 22/7)', options: ['154 cm²', '220 cm²', '308 cm²', '77 cm²'], correct: 0, explanation: 'Luas alas = πr² = 22/7 × 7² = 154 cm²' },
+        { question: 'Luas selimut tabung dengan r = 5 cm dan t = 12 cm adalah? (π = 3,14)', options: ['188,4 cm²', '314 cm²', '376,8 cm²', '565,2 cm²'], correct: 2, explanation: 'Luas selimut = 2πrt = 2 × 3,14 × 5 × 12 = 376,8 cm²' },
+        { question: 'Volume tabung dengan r = 10 cm dan t = 15 cm adalah? (π = 3,14)', options: ['1413 cm³', '2826 cm³', '4710 cm³', '7065 cm³'], correct: 2, explanation: 'V = πr²t = 3,14 × 100 × 15 = 4710 cm³' },
+        { question: 'Jika luas alas tabung adalah 314 cm² dan π = 3,14, berapa jari-jarinya?', options: ['5 cm', '10 cm', '15 cm', '20 cm'], correct: 1, explanation: 'πr² = 314 → r² = 100 → r = 10 cm' },
+        { question: 'Tabung dengan volume 1540 cm³ dan r = 7 cm. Berapa tingginya? (π = 22/7)', options: ['10 cm', '15 cm', '20 cm', '25 cm'], correct: 0, explanation: 'V = πr²t → 1540 = 154 × t → t = 10 cm' },
+        { question: 'Luas selimut tabung adalah 880 cm² dan tinggi 10 cm. Berapa jari-jarinya? (π = 22/7)', options: ['7 cm', '10 cm', '14 cm', '20 cm'], correct: 2, explanation: '2πrt = 880 → 2 × 22/7 × r × 10 = 880 → r = 14 cm' },
+        { question: 'Dua tabung mempunyai jari-jari sama. Tabung A tinggi 10 cm, tabung B tinggi 20 cm. Perbandingan volume A:B adalah?', options: ['1:2', '1:3', '1:4', '2:3'], correct: 0, explanation: 'V = πr²t, jadi perbandingan volume = 10:20 = 1:2' },
+        { question: 'Tabung berdiameter 20 cm dan tinggi 14 cm. Berapa volume tabung? (π = 22/7)', options: ['4400 cm³', '6600 cm³', '8800 cm³', '11000 cm³'], correct: 0, explanation: 'r = 10 cm, V = πr²t = 22/7 × 100 × 14 = 4400 cm³' },
+        { question: 'Luas permukaan tabung dengan r = 6 cm dan t = 8 cm adalah? (π = 3,14)', options: ['527,52 cm²', '614,96 cm²', '703,36 cm²', '791,28 cm²'], correct: 0, explanation: 'Luas permukaan = 2πr² + 2πrt = 226,08 + 301,44 = 527,52 cm²' },
+        { question: 'Sebuah tabung dengan r = 7 cm dan t = 20 cm. Berapa luas permukaan tabung? (π = 22/7)', options: ['880 cm²', '1188 cm²', '1496 cm²', '1760 cm²'], correct: 1, explanation: 'Luas permukaan = 2πr(r+t) = 2 × 22/7 × 7 × 27 = 1188 cm²' }
+      ],
+      cone: [
+        { question: 'Sebuah kerucut memiliki jari-jari 6 cm dan tinggi 8 cm. Berapa garis pelukisnya?', options: ['10 cm', '12 cm', '14 cm', '16 cm'], correct: 0, explanation: 's = √(r² + t²) = √(36 + 64) = 10 cm' },
+        { question: 'Luas alas kerucut dengan r = 7 cm adalah? (π = 22/7)', options: ['154 cm²', '220 cm²', '308 cm²', '440 cm²'], correct: 0, explanation: 'Luas alas = πr² = 22/7 × 49 = 154 cm²' },
+        { question: 'Luas selimut kerucut dengan r = 5 cm dan s = 13 cm adalah? (π = 3,14)', options: ['157 cm²', '204,1 cm²', '251,2 cm²', '314 cm²'], correct: 1, explanation: 'Luas selimut = πrs = 3,14 × 5 × 13 = 204,1 cm²' },
+        { question: 'Volume kerucut dengan r = 10 cm dan t = 12 cm adalah? (π = 3,14)', options: ['314 cm³', '628 cm³', '1256 cm³', '1884 cm³'], correct: 2, explanation: 'V = 1/3 × πr²t = 1/3 × 3,14 × 100 × 12 = 1256 cm³' },
+        { question: 'Kerucut dengan volume 314 cm³ dan r = 5 cm. Berapa tingginya? (π = 3,14)', options: ['6 cm', '12 cm', '18 cm', '24 cm'], correct: 1, explanation: '314 = 1/3 × 3,14 × 25 × t → t = 12 cm' },
+        { question: 'Jika luas alas kerucut 314 cm² dan π = 3,14, berapa jari-jarinya?', options: ['5 cm', '10 cm', '15 cm', '20 cm'], correct: 1, explanation: 'πr² = 314 → r² = 100 → r = 10 cm' },
+        { question: 'Luas selimut kerucut adalah 550 cm² dan s = 25 cm. Berapa jari-jarinya? (π = 22/7)', options: ['7 cm', '10 cm', '14 cm', '21 cm'], correct: 0, explanation: 'πrs = 550 → 22/7 × r × 25 = 550 → r = 7 cm' },
+        { question: 'Kerucut berdiameter 14 cm dan tinggi 24 cm. Berapa volumenya? (π = 22/7)', options: ['1232 cm³', '1848 cm³', '2464 cm³', '3696 cm³'], correct: 0, explanation: 'r = 7 cm, V = 1/3 × 22/7 × 49 × 24 = 1232 cm³' },
+        { question: 'Luas permukaan kerucut dengan r = 7 cm dan s = 25 cm adalah? (π = 22/7)', options: ['176 cm²', '528 cm²', '704 cm²', '880 cm²'], correct: 2, explanation: 'Luas permukaan = πr² + πrs = 154 + 550 = 704 cm²' },
+        { question: 'Perbandingan volume kerucut A (r=5, t=12) dengan kerucut B (r=5, t=24) adalah?', options: ['1:2', '1:3', '1:4', '2:3'], correct: 0, explanation: 'V_A/V_B = 12/24 = 1:2' }
+      ],
+      sphere: [
+        { question: 'Luas permukaan bola dengan r = 7 cm adalah? (π = 22/7)', options: ['154 cm²', '308 cm²', '616 cm²', '924 cm²'], correct: 2, explanation: 'Luas permukaan = 4πr² = 4 × 22/7 × 49 = 616 cm²' },
+        { question: 'Volume bola dengan r = 10 cm adalah? (π = 3,14)', options: ['1256 cm³', '2512 cm³', '3768 cm³', '4186,7 cm³'], correct: 3, explanation: 'V = 4/3 × πr³ = 4/3 × 3,14 × 1000 = 4186,7 cm³' },
+        { question: 'Luas permukaan bola dengan r = 5 cm adalah? (π = 3,14)', options: ['314 cm²', '523,3 cm²', '654,3 cm²', '785 cm²'], correct: 0, explanation: '4 × 3,14 × 25 = 314 cm²' },
+        { question: 'Jika luas permukaan bola 1256 cm² dan π = 3,14, berapa jari-jarinya?', options: ['5 cm', '10 cm', '15 cm', '20 cm'], correct: 1, explanation: '4πr² = 1256 → r² = 100 → r = 10 cm' },
+        { question: 'Volume bola dengan diameter 14 cm adalah? (π = 22/7)', options: ['1437,33 cm³', '1456 cm³', '1437 cm³', '1616 cm³'], correct: 0, explanation: 'r = 7, V = 4/3 × 22/7 × 7³ = 1437,33 cm³' },
+        { question: 'Perbandingan luas permukaan bola A (r=5) dan B (r=10) adalah?', options: ['1:2', '1:4', '1:8', '2:5'], correct: 1, explanation: 'Luas permukaan berbanding dengan r², jadi 25:100 = 1:4' },
+        { question: 'Dua bola masing-masing bervolume V. Jika jari-jarinya 2 kali semula, berapa volume barunya?', options: ['2V', '4V', '8V', '16V'], correct: 2, explanation: 'V baru = 4/3 π (2r)³ = 8V' },
+        { question: 'Sebuah bola berjari-jari 10 cm. Berapa luas permukaan bola? (π = 3,14)', options: ['628 cm²', '1256 cm²', '1884 cm²', '2512 cm²'], correct: 1, explanation: 'Luas permukaan = 4πr² = 4 × 3,14 × 100 = 1256 cm²' },
+        { question: 'Bola A memiliki r = 3 cm dan bola B memiliki r = 6 cm. Berapa perbandingan volumenya?', options: ['1:2', '1:4', '1:8', '1:16'], correct: 2, explanation: 'Volume berbanding kubik dengan jari-jari, jadi 3³:6³ = 27:216 = 1:8' },
+        { question: 'Volume bola dengan r = 6 cm adalah? (π = 3,14)', options: ['452,16 cm³', '678,24 cm³', '904,32 cm³', '1130,4 cm³'], correct: 2, explanation: 'V = 4/3 × πr³ = 4/3 × 3,14 × 216 = 904,32 cm³' }
+      ]
+    };
+
+    const app = {
+      state: {
+        currentShape: 'cylinder',
+        currentPart: 'base',
+        currentQuestion: 0,
+        score: 0,
+        questions: [],
+        answered: false,
+        selectedAnswer: null,
+        sessionId: ''
+      }
+    };
+
+    const canvas = document.getElementById('canvas');
+    const floatingLabel = document.getElementById('floatingLabel');
+    const shapeButtons = [...document.querySelectorAll('.shape-btn')];
+    const zoomButtons = [...document.querySelectorAll('.zoom-btn')];
+    let scene, camera, renderer, mesh;
+
+    function hashString(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function seededShuffle(array, seed) {
+      const a = [...array];
+      for (let i = a.length - 1; i > 0; i--) {
+        seed = (seed * 9301 + 49297) % 233280;
+        const random = seed / 233280;
+        const j = Math.floor(random * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function generateSessionId() {
+      const now = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      return `${random}-${now}`;
+    }
+
+    function getSessionFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('session');
+    }
+
+    function updateUrlSession(sessionId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('session', sessionId);
+      window.history.replaceState({}, '', url);
+    }
+
+    function generateQRCode() {
+      const sessionId = app.state.sessionId || generateSessionId();
+      app.state.sessionId = sessionId;
+      updateUrlSession(sessionId);
+
+      const shareUrl = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
+      const qrContainer = document.getElementById('qrCode');
+      qrContainer.innerHTML = '';
+      QRCode.toCanvas(qrContainer, shareUrl, {
+        width: 260,
+        margin: 2,
+        color: {
+          dark: '#667eea',
+          light: '#ffffff'
         }
+      }, function (error) {
+        if (error) console.error(error);
+      });
 
-        function zoomPart(part) {
-            currentZoom = part;
-            document.querySelectorAll('.zoom-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            updateInfo();
-        }
+      document.getElementById('sessionCode').textContent = 'Kode Sesi: ' + sessionId;
+    }
 
-        function updateInfo() {
-            let title, description, formula;
+    function initThreeJS() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+      camera.position.z = 3.5;
 
-            if (currentShape === 'cylinder') {
-                if (currentZoom === 'base') {
-                    title = '📍 Alas Tabung';
-                    description = 'Alas tabung berbentuk lingkaran. Untuk menghitung luas alas, gunakan rumus luas lingkaran.';
-                    formula = 'Luas Alas = πr²';
-                } else if (currentZoom === 'lateral') {
-                    title = '🔄 Selimut Tabung';
-                    description = 'Selimut tabung adalah sisi lengkung yang membungkus tabung. Jika dibuka akan berbentuk persegi panjang.';
-                    formula = 'Luas Selimut = 2πrt';
-                } else if (currentZoom === 'height') {
-                    title = '📏 Tinggi Tabung';
-                    description = 'Tinggi tabung adalah jarak antara alas dan tutup tabung yang sejajar.';
-                    formula = 'Tinggi = t (diberikan)';
-                }
-            } else if (currentShape === 'cone') {
-                if (currentZoom === 'base') {
-                    title = '📍 Alas Kerucut';
-                    description = 'Alas kerucut berbentuk lingkaran, sama seperti alas tabung.';
-                    formula = 'Luas Alas = πr²';
-                } else if (currentZoom === 'lateral') {
-                    title = '🔄 Selimut Kerucut';
-                    description = 'Selimut kerucut adalah sisi lengkung yang membentuk bentuk kerucut. s adalah garis pelukis.';
-                    formula = 'Luas Selimut = πrs (s = √(r² + t²))';
-                } else if (currentZoom === 'height') {
-                    title = '📏 Tinggi Kerucut';
-                    description = 'Tinggi kerucut adalah jarak dari puncak ke pusat alas, tegak lurus dengan alas.';
-                    formula = 'Tinggi = t (diberikan)';
-                }
-            } else if (currentShape === 'sphere') {
-                if (currentZoom === 'base') {
-                    title = '🌍 Permukaan Bola';
-                    description = 'Bola adalah bangun ruang yang terbentuk dari rotasi setengah lingkaran. Semua titik pada permukaan berjarak sama dari pusat.';
-                    formula = 'Luas Permukaan = 4πr²';
-                } else if (currentZoom === 'lateral') {
-                    title = '🌍 Permukaan Bola';
-                    description = 'Seluruh permukaan bola merupakan satu kesatuan dengan jari-jari yang sama ke semua arah.';
-                    formula = 'Luas Permukaan = 4πr²';
-                } else if (currentZoom === 'height') {
-                    title = '📏 Jari-jari Bola';
-                    description = 'Jari-jari bola adalah jarak dari pusat bola ke permukaan bola.';
-                    formula = 'Jari-jari = r (diberikan)';
-                }
-            }
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setClearColor(0x000000, 0);
 
-            document.getElementById('partTitle').textContent = title;
-            document.getElementById('partDescription').textContent = description;
-            document.getElementById('formulaBox').textContent = formula;
-        }
+      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambient);
 
-        // Quiz System
-        let quizState = {
-            currentQuestion: 0,
-            score: 0,
-            selectedAnswer: null,
-            answered: false,
-            questions: []
-        };
+      const directional = new THREE.DirectionalLight(0xffffff, 0.9);
+      directional.position.set(4, 5, 5);
+      scene.add(directional);
 
-        const quizDatabase = {
-            cylinder: [
-                {
-                    question: 'Sebuah tabung memiliki jari-jari 7 cm dan tinggi 10 cm. Berapa luas alas tabung? (π = 22/7)',
-                    options: ['154 cm²', '220 cm²', '308 cm²', '77 cm²'],
-                    correct: 0,
-                    explanation: 'Luas alas = πr² = 22/7 × 7² = 22/7 × 49 = 154 cm²'
-                },
-                {
-                    question: 'Luas selimut tabung dengan r = 5 cm dan t = 12 cm adalah? (π = 3,14)',
-                    options: ['188,4 cm²', '314 cm²', '376,8 cm²', '565,2 cm²'],
-                    correct: 2,
-                    explanation: 'Luas selimut = 2πrt = 2 × 3,14 × 5 × 12 = 376,8 cm²'
-                },
-                {
-                    question: 'Volume tabung dengan r = 10 cm dan t = 15 cm adalah? (π = 3,14)',
-                    options: ['1413 cm³', '2826 cm³', '4710 cm³', '7065 cm³'],
-                    correct: 2,
-                    explanation: 'Volume = πr²t = 3,14 × 10² × 15 = 3,14 × 100 × 15 = 4710 cm³'
-                },
-                {
-                    question: 'Luas permukaan tabung dengan r = 6 cm dan t = 8 cm adalah? (π = 3,14)',
-                    options: ['527,52 cm²', '614,96 cm²', '703,36 cm²', '791,28 cm²'],
-                    correct: 1,
-                    explanation: 'Luas permukaan = 2πr² + 2πrt = 2 × 3,14 × 6² + 2 × 3,14 × 6 × 8 = 226,08 + 301,44 = 527,52 cm²'
-                },
-                {
-                    question: 'Jika luas alas tabung adalah 314 cm² dan π = 3,14, berapa jari-jarinya?',
-                    options: ['5 cm', '10 cm', '15 cm', '20 cm'],
-                    correct: 1,
-                    explanation: 'πr² = 314; r² = 314/3,14 = 100; r = 10 cm'
-                },
-                {
-                    question: 'Sebuah tabung dengan r = 7 cm dan t = 20 cm. Berapa luas permukaan tabung? (π = 22/7)',
-                    options: ['880 cm²', '1188 cm²', '1496 cm²', '1760 cm²'],
-                    correct: 2,
-                    explanation: 'Luas permukaan = 2πr(r+t) = 2 × 22/7 × 7 × 27 = 44 × 27 = 1188 cm²'
-                },
-                {
-                    question: 'Tabung dengan volume 1540 cm³ dan r = 7 cm. Berapa tingginya? (π = 22/7)',
-                    options: ['10 cm', '15 cm', '20 cm', '25 cm'],
-                    correct: 0,
-                    explanation: 'V = πr²t; 1540 = 22/7 × 49 × t; t = 1540/154 = 10 cm'
-                },
-                {
-                    question: 'Luas selimut tabung adalah 880 cm² dan t = 10 cm. Berapa jari-jarinya? (π = 22/7)',
-                    options: ['7 cm', '10 cm', '14 cm', '20 cm'],
-                    correct: 2,
-                    explanation: '2πrt = 880; 2 × 22/7 × r × 10 = 880; r = 14 cm'
-                },
-                {
-                    question: 'Dua tabung mempunyai jari-jari sama. Tabung A tingginya 10 cm, tabung B tingginya 20 cm. Perbandingan volume A:B adalah?',
-                    options: ['1:2', '1:3', '1:4', '2:3'],
-                    correct: 0,
-                    explanation: 'V = πr²t; V_A/V_B = (πr²×10)/(πr²×20) = 10/20 = 1/2'
-                },
-                {
-                    question: 'Tabung berdiameter 20 cm dan tinggi 14 cm. Berapa volume tabung? (π = 22/7)',
-                    options: ['4400 cm³', '6600 cm³', '8800 cm³', '11000 cm³'],
-                    correct: 0,
-                    explanation: 'r = 10 cm; V = πr²t = 22/7 × 100 × 14 = 4400 cm³'
-                }
-            ],
-            cone: [
-                {
-                    question: 'Sebuah kerucut memiliki jari-jari 6 cm dan tinggi 8 cm. Berapa garis pelukisnya?',
-                    options: ['10 cm', '12 cm', '14 cm', '16 cm'],
-                    correct: 0,
-                    explanation: 's = √(r² + t²) = √(6² + 8²) = √(36 + 64) = √100 = 10 cm'
-                },
-                {
-                    question: 'Luas alas kerucut dengan r = 7 cm adalah? (π = 22/7)',
-                    options: ['154 cm²', '220 cm²', '308 cm²', '440 cm²'],
-                    correct: 0,
-                    explanation: 'Luas alas = πr² = 22/7 × 7² = 154 cm²'
-                },
-                {
-                    question: 'Luas selimut kerucut dengan r = 5 cm dan s = 13 cm adalah? (π = 3,14)',
-                    options: ['157 cm²', '204,1 cm²', '251,2 cm²', '314 cm²'],
-                    correct: 1,
-                    explanation: 'Luas selimut = πrs = 3,14 × 5 × 13 = 204,1 cm²'
-                },
-                {
-                    question: 'Volume kerucut dengan r = 10 cm dan t = 12 cm adalah? (π = 3,14)',
-                    options: ['314 cm³', '628 cm³', '1256 cm³', '1884 cm³'],
-                    correct: 2,
-                    explanation: 'V = 1/3 × πr²t = 1/3 × 3,14 × 100 × 12 = 1256 cm³'
-                },
-                {
-                    question: 'Luas permukaan kerucut dengan r = 7 cm dan s = 25 cm adalah? (π = 22/7)',
-                    options: ['176 cm²', '528 cm²', '704 cm²', '880 cm²'],
-                    correct: 2,
-                    explanation: 'Luas permukaan = πr² + πrs = 154 + 550 = 704 cm²'
-                },
-                {
-                    question: 'Kerucut dengan volume 314 cm³ dan r = 5 cm. Berapa tingginya? (π = 3,14)',
-                    options: ['6 cm', '12 cm', '18 cm', '24 cm'],
-                    correct: 1,
-                    explanation: 'V = 1/3 × πr²t; 314 = 1/3 × 3,14 × 25 × t; t = 12 cm'
-                },
-                {
-                    question: 'Jika luas alas kerucut 314 cm² dan π = 3,14, berapa jari-jarinya?',
-                    options: ['5 cm', '10 cm', '15 cm', '20 cm'],
-                    correct: 1,
-                    explanation: 'πr² = 314; r² = 100; r = 10 cm'
-                },
-                {
-                    question: 'Luas selimut kerucut adalah 550 cm² dan s = 25 cm. Berapa jari-jarinya? (π = 22/7)',
-                    options: ['7 cm', '10 cm', '14 cm', '21 cm'],
-                    correct: 0,
-                    explanation: 'πrs = 550; 22/7 × r × 25 = 550; r = 7 cm'
-                },
-                {
-                    question: 'Kerucut berdiameter 14 cm dan tinggi 24 cm. Berapa volumenya? (π = 22/7)',
-                    options: ['1232 cm³', '1848 cm³', '2464 cm³', '3696 cm³'],
-                    correct: 0,
-                    explanation: 'r = 7; V = 1/3 × 22/7 × 49 × 24 = 1/3 × 3696 = 1232 cm³'
-                },
-                {
-                    question: 'Perbandingan volume kerucut A (r=5, t=12) dengan kerucut B (r=5, t=24) adalah?',
-                    options: ['1:2', '1:3', '1:4', '2:3'],
-                    correct: 0,
-                    explanation: 'V_A/V_B = (1/3×π×25×12)/(1/3×π×25×24) = 12/24 = 1/2'
-                }
-            ],
-            sphere: [
-                {
-                    question: 'Luas permukaan bola dengan r = 7 cm adalah? (π = 22/7)',
-                    options: ['154 cm²', '308 cm²', '616 cm²', '924 cm²'],
-                    correct: 2,
-                    explanation: 'Luas permukaan = 4πr² = 4 × 22/7 × 49 = 616 cm²'
-                },
-                {
-                    question: 'Volume bola dengan r = 10 cm adalah? (π = 3,14)',
-                    options: ['1256 cm³', '2512 cm³', '3768 cm³', '4186,7 cm³'],
-                    correct: 3,
-                    explanation: 'V = 4/3 × πr³ = 4/3 × 3,14 × 1000 = 4186,7 cm³'
-                },
-                {
-                    question: 'Luas permukaan bola dengan r = 5 cm adalah? (π = 3,14)',
-                    options: ['314 cm²', '523,3 cm²', '654,3 cm²', '785 cm²'],
-                    correct: 0,
-                    explanation: 'Luas permukaan = 4πr² = 4 × 3,14 × 25 = 314 cm²'
-                },
-                {
-                    question: 'Jika luas permukaan bola 1256 cm² dan π = 3,14, berapa jari-jarinya?',
-                    options: ['5 cm', '10 cm', '15 cm', '20 cm'],
-                    correct: 1,
-                    explanation: '4πr² = 1256; r² = 100; r = 10 cm'
-                },
-                {
-                    question: 'Volume bola dengan diameter 14 cm adalah? (π = 22/7)',
-                    options: ['1437,3 cm³', '1456 cm³', '1437,33 cm³', '1616 cm³'],
-                    correct: 0,
-                    explanation: 'r = 7; V = 4/3 × 22/7 × 343 = 1437,33 cm³'
-                },
-                {
-                    question: 'Perbandingan luas permukaan bola A (r=5) dan B (r=10) adalah?',
-                    options: ['1:2', '1:4', '1:8', '2:5'],
-                    correct: 1,
-                    explanation: 'L_A/L_B = (4π×25)/(4π×100) = 25/100 = 1/4'
-                },
-                {
-                    question: 'Dua bola masing-masing bervolume V. Jika salah satunya diperbesar sehingga jari-jarinya 2 kali semula, berapa volume barunya?',
-                    options: ['2V', '4V', '8V', '16V'],
-                    correct: 2,
-                    explanation: 'V = 4/3 × πr³; Jika r menjadi 2r, maka V\' = 4/3 × π(2r)³ = 8V'
-                },
-                {
-                    question: 'Sebuah bola berjari-jari 10 cm. Berapa luas permukaan bola? (π = 3,14)',
-                    options: ['628 cm²', '1256 cm²', '1884 cm²', '2512 cm²'],
-                    correct: 1,
-                    explanation: 'Luas permukaan = 4πr² = 4 × 3,14 × 100 = 1256 cm²'
-                },
-                {
-                    question: 'Bola A memiliki r = 3 cm dan bola B memiliki r = 6 cm. Berapa perbandingan volumenya?',
-                    options: ['1:2', '1:4', '1:8', '1:16'],
-                    correct: 2,
-                    explanation: 'V_A/V_B = (4/3 × π × 27)/(4/3 × π × 216) = 27/216 = 1/8'
-                },
-                {
-                    question: 'Volume bola dengan r = 6 cm adalah? (π = 3,14)',
-                    options: ['452,16 cm³', '678,24 cm³', '904,32 cm³', '1130,4 cm³'],
-                    correct: 2,
-                    explanation: 'V = 4/3 × πr³ = 4/3 × 3,14 × 216 = 904,32 cm³'
-                }
-            ]
-        };
+      drawShape();
+      animate();
+    }
 
-        function generateNewQuiz() {
-            // Shuffle questions
-            const questions = [...quizDatabase[currentShape]].sort(() => Math.random() - 0.5);
-            quizState = {
-                currentQuestion: 0,
-                score: 0,
-                selectedAnswer: null,
-                answered: false,
-                questions: questions
-            };
-            document.getElementById('resultsSection').classList.add('hidden');
-            displayQuestion();
-        }
+    function drawShape() {
+      if (mesh) scene.remove(mesh);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x667eea,
+        shininess: 100,
+        emissive: 0x152b6f,
+        emissiveIntensity: 0.06
+      });
 
-        function displayQuestion() {
-            const q = quizState.questions[quizState.currentQuestion];
-            let html = `<div class="question">
-                <h3>${q.question}</h3>
-                <div class="options">`;
+      let geometry;
+      if (app.state.currentShape === 'cylinder') {
+        geometry = new THREE.CylinderGeometry(1, 1, 2.1, 40);
+      } else if (app.state.currentShape === 'cone') {
+        geometry = new THREE.ConeGeometry(1.2, 2.5, 40);
+      } else {
+        geometry = new THREE.SphereGeometry(1.3, 40, 40);
+      }
 
-            q.options.forEach((option, index) => {
-                html += `<label class="option">
-                    <input type="radio" name="answer" value="${index}" onchange="selectAnswer(${index})" ${quizState.answered ? 'disabled' : ''}>
-                    <span>${String.fromCharCode(65 + index)}. ${option}</span>
-                </label>`;
-            });
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = 0.5;
+      mesh.rotation.y = 0.7;
+      scene.add(mesh);
+      updateInfoBox();
+    }
 
-            html += `</div>`;
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mesh) {
+        mesh.rotation.y += 0.008;
+        mesh.rotation.x += 0.003;
+      }
+      renderer.render(scene, camera);
+    }
 
-            if (quizState.answered) {
-                const feedbackClass = quizState.selectedAnswer === q.correct ? 'correct' : 'incorrect';
-                const feedbackText = quizState.selectedAnswer === q.correct ? 
-                    '✅ Jawaban Benar!' : '❌ Jawaban Salah!';
-                html += `<div class="feedback show ${feedbackClass}">
-                    <strong>${feedbackText}</strong><br>
-                    ${q.explanation}
-                </div>`;
-            }
+    function setShape(shape) {
+      app.state.currentShape = shape;
+      app.state.currentPart = 'base';
 
-            html += `</div>`;
-            document.getElementById('quizContent').innerHTML = html;
-            document.getElementById('questionCounter').textContent = `Soal ${quizState.currentQuestion + 1} dari ${quizState.questions.length}`;
-            document.getElementById('progressBar').style.width = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100 + '%';
-            document.getElementById('nextBtn').disabled = !quizState.answered;
-        }
+      shapeButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.shape === shape);
+      });
 
-        function selectAnswer(index) {
-            if (quizState.answered) return;
-            quizState.selectedAnswer = index;
-            quizState.answered = true;
+      zoomButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.part === 'base');
+      });
 
-            if (index === quizState.questions[quizState.currentQuestion].correct) {
-                quizState.score++;
-            }
+      drawShape();
+      generateQuiz();
+    }
 
-            document.querySelectorAll('.option').forEach((opt, i) => {
-                if (i === quizState.questions[quizState.currentQuestion].correct) {
-                    opt.classList.add('correct');
-                }
-                if (i === index && index !== quizState.questions[quizState.currentQuestion].correct) {
-                    opt.classList.add('incorrect');
-                }
-            });
+    function setPart(part) {
+      app.state.currentPart = part;
+      zoomButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.part === part);
+      });
+      updateInfoBox();
+    }
 
-            document.getElementById('nextBtn').disabled = false;
-            displayQuestion();
-        }
+    function updateInfoBox() {
+      const info = shapeInfo[app.state.currentShape][app.state.currentPart];
+      document.getElementById('partTitle').textContent = info.title;
+      document.getElementById('partDescription').textContent = info.description;
+      document.getElementById('formulaBox').textContent = info.formula;
+      floatingLabel.textContent = info.floating;
+      floatingLabel.classList.add('show');
 
-        function nextQuestion() {
-            quizState.currentQuestion++;
-            if (quizState.currentQuestion < quizState.questions.length) {
-                quizState.selectedAnswer = null;
-                quizState.answered = false;
-                displayQuestion();
-            } else {
-                showResults();
-            }
-        }
+      setTimeout(() => {
+        floatingLabel.classList.remove('show');
+      }, 1800);
+    }
 
-        function showResults() {
-            const percentage = (quizState.score / quizState.questions.length) * 100;
-            const scoreDisplay = document.getElementById('scoreDisplay');
-            const messageEl = document.getElementById('resultMessage');
+    function buildQuestionSet() {
+      const baseQuestions = quizDatabase[app.state.currentShape] || quizDatabase.cylinder;
+      const sessionSeed = hashString(`${app.state.sessionId || 'session'}-${app.state.currentShape}`);
+      const shuffled = seededShuffle(baseQuestions, sessionSeed);
+      return shuffled.slice(0, Math.min(10, shuffled.length));
+    }
 
-            scoreDisplay.textContent = `${quizState.score}/${quizState.questions.length}`;
+    function generateQuiz() {
+      if (!app.state.sessionId) {
+        app.state.sessionId = getSessionFromUrl() || generateSessionId();
+      }
+      app.state.questions = buildQuestionSet();
+      app.state.currentQuestion = 0;
+      app.state.score = 0;
+      app.state.answered = false;
+      app.state.selectedAnswer = null;
+      renderQuestion();
+      document.getElementById('resultPanel').classList.remove('show');
+      document.getElementById('quizContainer').style.display = 'block';
+      document.getElementById('nextBtn').disabled = true;
+    }
 
-            if (percentage === 100) {
-                scoreDisplay.classList = 'score-display excellent';
-                messageEl.textContent = '🌟 Sempurna! Anda menguasai materi ini dengan sangat baik!';
-            } else if (percentage >= 80) {
-                scoreDisplay.classList = 'score-display excellent';
-                messageEl.textContent = '🎉 Luar biasa! Anda memahami materi dengan baik!';
-            } else if (percentage >= 60) {
-                scoreDisplay.classList = 'score-display good';
-                messageEl.textContent = '👍 Bagus! Terus belajar untuk hasil yang lebih baik!';
-            } else if (percentage >= 40) {
-                scoreDisplay.classList = 'score-display fair';
-                messageEl.textContent = '📚 Perlu lebih banyak latihan. Ulangi kembali materinya!';
-            } else {
-                scoreDisplay.classList = 'score-display poor';
-                messageEl.textContent = '💪 Jangan menyerah! Pelajari kembali konsep dasarnya!';
-            }
+    function renderQuestion() {
+      const q = app.state.questions[app.state.currentQuestion];
+      if (!q) return;
 
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('resultsSection').classList.remove('hidden');
-        }
+      document.getElementById('questionCounter').textContent = `Soal ${app.state.currentQuestion + 1} dari ${app.state.questions.length}`;
+      document.getElementById('progressBar').style.width = `${((app.state.currentQuestion + 1) / app.state.questions.length) * 100}%`;
 
-        function resetQuiz() {
-            document.getElementById('quizContainer').classList.remove('hidden');
-            generateNewQuiz();
-        }
+      let html = `
+        <h3>${q.question}</h3>
+        <div class="options">
+      `;
 
-        // QR Code Generation
-        function generateSessionCode() {
-            const timestamp = Date.now();
-            const random = Math.random().toString(36).substring(7).toUpperCase();
-            const shapeCode = currentShape.substring(0, 1).toUpperCase();
-            return `${shapeCode}-${random}-${timestamp.toString().slice(-4)}`;
-        }
+      q.options.forEach((option, index) => {
+        const optionId = `option-${index}`;
+        html += `
+          <label class="option" for="${optionId}">
+            <input id="${optionId}" type="radio" name="answer" value="${index}" ${app.state.answered ? 'disabled' : ''}>
+            <span>${String.fromCharCode(65 + index)}. ${option}</span>
+          </label>
+        `;
+      });
 
-        function generateQRCode() {
-            const sessionCode = generateSessionCode();
-            const url = window.location.href + '?session=' + sessionCode;
-            
-            document.getElementById('sessionCode').textContent = sessionCode;
-            document.getElementById('qrCode').innerHTML = '';
+      html += '</div>';
 
-            QRCode.toCanvas(document.getElementById('qrCode'), url, {
-                width: 300,
-                margin: 2,
-                color: {
-                    dark: '#667eea',
-                    light: '#ffffff'
-                }
-            }, (error) => {
-                if (error) console.error(error);
-            });
-        }
+      if (app.state.answered) {
+        const isCorrect = app.state.selectedAnswer === q.correct;
+        const feedbackClass = isCorrect ? 'correct' : 'incorrect';
+        const feedbackText = isCorrect ? '✅ Jawaban benar!' : '❌ Jawaban salah!';
+        html += `
+          <div class="feedback show ${feedbackClass}">
+            <strong>${feedbackText}</strong><br>
+            ${q.explanation}
+          </div>
+        `;
+      }
 
-        function generateNewQR() {
-            generateQRCode();
-        }
+      document.getElementById('quizContent').innerHTML = html;
 
-        // Initialize
-        window.addEventListener('load', () => {
-            initThreeJS();
-            updateInfo();
-            generateNewQuiz();
-            generateQRCode();
+      document.querySelectorAll('input[name="answer"]').forEach((input) => {
+        input.addEventListener('change', (event) => {
+          const selected = Number(event.target.value);
+          if (app.state.answered) return;
 
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                const canvas = document.getElementById('canvas');
-                const width = canvas.clientWidth;
-                const height = canvas.clientHeight;
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
-            });
+          app.state.selectedAnswer = selected;
+          app.state.answered = true;
+
+          const currentQuestion = app.state.questions[app.state.currentQuestion];
+          const isCorrect = selected === currentQuestion.correct;
+          if (isCorrect) app.state.score += 1;
+
+          const optionEls = [...document.querySelectorAll('.option')];
+          optionEls.forEach((el, idx) => {
+            if (idx === currentQuestion.correct) el.classList.add('correct');
+            if (idx === selected && idx !== currentQuestion.correct) el.classList.add('incorrect');
+          });
+
+          document.getElementById('nextBtn').disabled = false;
+          renderQuestion();
         });
-    </script>
+      });
+    }
+
+    function showResults() {
+      const total = app.state.questions.length;
+      const percentage = (app.state.score / total) * 100;
+      const scoreEl = document.getElementById('scoreDisplay');
+      const resultEl = document.getElementById('resultMessage');
+
+      scoreEl.textContent = `${app.state.score}/${total}`;
+      scoreEl.className = 'score';
+
+      if (percentage >= 80) {
+        scoreEl.classList.add('excellent');
+        resultEl.textContent = '🎉 Luar biasa! Kamu memahami materi bangun ruang sisi lengkung dengan sangat baik.';
+      } else if (percentage >= 60) {
+        scoreEl.classList.add('good');
+        resultEl.textContent = '👍 Bagus! Terus latihan agar pemahamanmu makin kuat.';
+      } else if (percentage >= 40) {
+        scoreEl.classList.add('fair');
+        resultEl.textContent = '📚 Kamu sudah mulai memahami, tapi masih perlu latihan lebih banyak.';
+      } else {
+        scoreEl.classList.add('poor');
+        resultEl.textContent = '💪 Jangan menyerah! Pelajari kembali konsep dan rumusnya, lalu coba lagi.';
+      }
+
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('resultPanel').classList.add('show');
+    }
+
+    function nextQuestion() {
+      if (!app.state.answered) return;
+
+      if (app.state.currentQuestion < app.state.questions.length - 1) {
+        app.state.currentQuestion += 1;
+        app.state.answered = false;
+        app.state.selectedAnswer = null;
+        document.getElementById('nextBtn').disabled = true;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function restartQuiz() {
+      generateQuiz();
+      document.getElementById('nextBtn').disabled = true;
+      document.getElementById('resultPanel').classList.remove('show');
+      document.getElementById('quizContainer').style.display = 'block';
+    }
+
+    shapeButtons.forEach(btn => {
+      btn.addEventListener('click', () => setShape(btn.dataset.shape));
+    });
+
+    zoomButtons.forEach(btn => {
+      btn.addEventListener('click', () => setPart(btn.dataset.part));
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+    document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+    document.getElementById('newQrBtn').addEventListener('click', () => {
+      app.state.sessionId = generateSessionId();
+      generateQRCode();
+      generateQuiz();
+    });
+
+    window.addEventListener('resize', () => {
+      if (!camera || !renderer) return;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    });
+
+    window.addEventListener('load', () => {
+      const sessionFromUrl = getSessionFromUrl();
+      app.state.sessionId = sessionFromUrl || generateSessionId();
+      initThreeJS();
+      updateInfoBox();
+      generateQRCode();
+      generateQuiz();
+    });
+  </script>
 </body>
 </html>
