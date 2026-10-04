@@ -1,0 +1,23 @@
+{
+  "name": "math-learning",
+  "version": "1.0.0",
+  "description": "Interactive 3D geometry learning app with QR code and quiz generator for cylinder, cone, and sphere - Grade 9",
+  "type": "module",
+  "scripts": {
+    "start": "npx http-server . -p 8000",
+    "dev": "npx http-server . -p 8000 --cors",
+    "build": "echo 'Ready for deployment'",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": [
+    "math",
+    "geometry",
+    "3d",
+    "learning",
+    "quiz",
+    "qrcode",
+    "interactive"
+  ],
+  "author": "rulhafizzah10-bit",
+  "license": "MIT"
+}
